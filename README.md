@@ -58,7 +58,7 @@ POST /auth/login
 
 ## 📸 Teste no Postman
 
-<img src="Postman.PNG" />
+<img src="Postman.png" />
 
 > 💡 Substitua essa imagem por um print real do seu Postman testando o `/auth/login`
 
