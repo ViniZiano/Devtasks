@@ -129,3 +129,24 @@ Os testes dos endpoints foram realizados utilizando o **Postman**, validando:
 Estudante de Análise e Desenvolvimento de Sistemas
 🔗 (coloque aqui o link do seu LinkedIn)
 🔗 (coloque aqui o link do seu GitHub)
+
+
+## 🎨 Interface para portfólio
+
+O projeto também conta com uma interface web responsiva em `frontend/`, criada para apresentar o DevTasks de forma visual e elegante.
+
+### Como visualizar
+
+1. Entre na pasta `frontend/`.
+2. Abra o arquivo `index.html` no navegador.
+3. Use **Nova tarefa** para adicionar tarefas e os filtros para alternar entre status.
+
+> A interface utiliza dados locais para demonstração. A integração com os endpoints reais pode ser feita posteriormente substituindo o estado local por chamadas `fetch` para a API Spring Boot.
+
+### Destaques da interface
+
+- Dashboard com indicadores de produtividade.
+- Lista de tarefas com filtros por status.
+- Criação de tarefas em modal.
+- Layout responsivo para desktop e celular.
+- Design moderno com tipografia, cards, badges e progresso visual.

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevTasks — Gestão inteligente de tarefas</title>
+  <meta name="description" content="Interface demonstrativa do DevTasks, uma API REST de gerenciamento de tarefas com Java e Spring Boot.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">✓</span><span>dev<span>tasks</span></span></div>
+      <nav>
+        <a class="nav-item active" href="#overview">⌂ <span>Visão geral</span></a>
+        <a class="nav-item" href="#tasks">▤ <span>Minhas tarefas</span></a>
+        <a class="nav-item" href="#insights">◔ <span>Insights</span></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="api-status"><span></span><div><strong>Modo demonstração</strong><small>Dados locais para portfólio</small></div></div>
+        <a class="nav-item" href="https://github.com/ViniZiano/Devtasks" target="_blank" rel="noreferrer">↗ <span>Ver no GitHub</span></a>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="menuBtn">☰</button>
+        <div class="breadcrumb">Workspace <span>/</span> DevTasks</div>
+        <div class="top-actions"><button class="icon-btn" aria-label="Notificações">♧</button><div class="avatar">V</div></div>
+      </header>
+      <section class="content" id="overview">
+        <div class="hero">
+          <div><p class="eyebrow">TERÇA-FEIRA, 22 DE SETEMBRO</p><h1>Olá, Vinícius <span>✦</span></h1><p class="muted">Organize seu trabalho. Conquiste seus objetivos.</p></div>
+          <button class="primary" id="newTaskBtn">＋ Nova tarefa</button>
+        </div>
+        <div class="stats">
+          <article class="stat-card"><div class="stat-icon purple">▤</div><div><p>Total de tarefas</p><h2 id="total">12</h2><small>↑ 8% <span>vs. semana passada</span></small></div></article>
+          <article class="stat-card"><div class="stat-icon green">✓</div><div><p>Concluídas</p><h2 id="done">7</h2><small class="positive">↑ 12% <span>de produtividade</span></small></div></article>
+          <article class="stat-card"><div class="stat-icon orange">◷</div><div><p>Em andamento</p><h2 id="progress">3</h2><small>2 para hoje</small></div></article>
+          <article class="stat-card"><div class="stat-icon blue">◉</div><div><p>Taxa de conclusão</p><h2 id="rate">58%</h2><div class="mini-progress"><span id="rateBar"></span></div></div></article>
+        </div>
+        <div class="section-grid">
+          <section class="panel" id="tasks">
+            <div class="panel-heading"><div><h3>Minhas tarefas</h3><p class="muted">Acompanhe suas atividades recentes</p></div><button class="text-btn" id="filterBtn">Todas ▾</button></div>
+            <div class="filters"><button class="filter active" data-filter="all">Todas</button><button class="filter" data-filter="todo">A fazer</button><button class="filter" data-filter="progress">Em andamento</button><button class="filter" data-filter="done">Concluídas</button></div>
+            <div id="taskList" class="task-list"></div>
+          </section>
+          <aside class="panel progress-panel" id="insights">
+            <div class="panel-heading"><div><h3>Seu progresso</h3><p class="muted">Meta semanal</p></div><span class="pill">Esta semana</span></div>
+            <div class="ring-wrap"><div class="ring"><div><strong id="ringValue">72%</strong><span>concluído</span></div></div></div>
+            <p class="center muted">Você está a <strong>3 tarefas</strong> de alcançar sua meta.</p>
+            <div class="goal"><div><span>Meta semanal</span><strong>10 / 14</strong></div><div class="goal-track"><span></span></div></div>
+            <div class="tip"><span>✦</span><div><strong>Continue assim!</strong><p>Pequenos passos todos os dias geram grandes resultados.</p></div></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+  <dialog id="taskDialog"><form method="dialog" id="taskForm"><div class="dialog-head"><h3>Nova tarefa</h3><button value="cancel" class="close">×</button></div><label for="title">Título da tarefa</label><input id="title" required placeholder="Ex.: Criar endpoint de usuários"><label for="category">Categoria</label><select id="category"><option>Desenvolvimento</option><option>Estudos</option><option>Planejamento</option><option>Design</option></select><div class="dialog-actions"><button value="cancel" class="secondary">Cancelar</button><button class="primary" value="default">Adicionar tarefa</button></div></form></dialog>
+  <script src="script.js"></script>
+</body>
+</html>
