@@ -55,13 +55,10 @@ POST /auth/login
 }
 ```
  
-> ⚠️ **Nota de melhoria:** atualmente a API retorna o token como texto puro. O recomendado é envolver a resposta em um objeto JSON, como no exemplo acima — ajuste o `AuthController` para isso.
- 
 ---
  
 ## 📂 Endpoints principais
  
-> Preencha esta seção com os endpoints reais do `TaskController` (método HTTP, rota, parâmetros e exemplo de resposta). Um recrutador que não roda o projeto localmente forma a opinião sobre ele só lendo esta tabela.
  
 | Método | Rota             | Descrição                  | Autenticação |
 |--------|-------------------|-----------------------------|--------------|
@@ -78,7 +75,6 @@ POST /auth/login
  
 ![Teste do endpoint de login no Postman](docs/postman-login.png)
  
-> Adicione aqui também um print do CRUD de tarefas (`GET /tasks`, `POST /tasks`), para mostrar a API completa, não só o login.
  
 ---
  
@@ -115,7 +111,6 @@ spring.datasource.password=sua_senha
 spring.jpa.hibernate.ddl-auto=update
 ```
  
-> ⚠️ **Nota de segurança:** nunca suba senhas ou o segredo do JWT direto no `application.properties` versionado. Use variáveis de ambiente (`${DB_PASSWORD}`, `${JWT_SECRET}`) e deixe um `application.properties.example` no repositório como modelo.
  
 ### 3. Execute a aplicação
  
@@ -147,7 +142,6 @@ O projeto também conta com uma interface web responsiva em `frontend/`, criada 
 1. Entre na pasta `frontend/`.
 2. Abra o arquivo `index.html` no navegador.
 3. Use **Nova tarefa** para adicionar tarefas e os filtros para alternar entre status.
-> A interface utiliza dados locais para demonstração. A integração com os endpoints reais pode ser feita substituindo o estado local por chamadas `fetch` para a API Spring Boot (próximo passo do projeto).
  
 ### Destaques da interface
  
