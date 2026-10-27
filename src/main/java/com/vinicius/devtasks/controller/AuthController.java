@@ -6,6 +6,7 @@ import com.vinicius.devtasks.repository.UsuarioRepository;
 import com.vinicius.devtasks.security.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,10 +14,14 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthController(UsuarioRepository repository, JwtService jwtService) {
+    public AuthController(UsuarioRepository repository,
+                          PasswordEncoder passwordEncoder,
+                          JwtService jwtService) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
 
@@ -31,7 +36,7 @@ public class AuthController {
 
         Usuario usuario = usuarioOpt.get();
 
-        if (!usuario.getSenha().equals(login.senha())) {
+        if (login.senha() == null || !passwordEncoder.matches(login.senha(), usuario.getSenha())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Senha inválida");
         }

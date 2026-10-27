@@ -18,24 +18,20 @@ public class TarefaController {
     }
 
     @PostMapping
-    public Tarefa criar(@RequestBody Tarefa tarefa) {
-        return service.salvar(tarefa);
+    public TarefaDTO criar(@RequestBody Tarefa tarefa) {
+        return TarefaDTO.de(service.salvar(tarefa));
     }
 
     @GetMapping
     public List<TarefaDTO> listar() {
         return service.listar().stream()
-                .map(t -> new TarefaDTO(
-                        t.getId(),
-                        t.getTitulo(),
-                        t.getStatus(),
-                        t.getUsuario().getNome()
-                ))
+                .map(TarefaDTO::de)
                 .toList();
     }
+
     @GetMapping("/{id}")
-    public Tarefa buscar(@PathVariable Long id) {
-        return service.buscarPorId(id);
+    public TarefaDTO buscar(@PathVariable Long id) {
+        return TarefaDTO.de(service.buscarPorId(id));
     }
 
     @DeleteMapping("/{id}")
