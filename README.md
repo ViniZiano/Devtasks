@@ -1,183 +1,180 @@
 # 🚀 DevTasks API
- 
-API REST desenvolvida com **Java e Spring Boot** para gerenciamento de tarefas, com autenticação de usuários utilizando **JWT (JSON Web Token)**.
- 
-Este projeto foi criado com foco em práticas de desenvolvimento backend, incluindo construção de endpoints REST, integração com banco de dados e autenticação segura.
- 
+
+API REST desenvolvida com **Java 21 e Spring Boot** para gerenciamento de tarefas, com cadastro de usuários, senhas protegidas com BCrypt e geração de **JWT (JSON Web Token)** no login.
+
+Projeto criado com foco em práticas de desenvolvimento backend: endpoints REST, persistência com Spring Data JPA, testes automatizados, containerização e integração contínua.
+
 ---
- 
+
 ## 📌 Funcionalidades
- 
-- ✅ Cadastro de usuários
-- ✅ Login com autenticação
-- ✅ Geração de token JWT
+
+- ✅ Cadastro de usuários (senha armazenada com hash BCrypt)
+- ✅ Login com geração de token JWT (expira em 1 hora)
 - ✅ CRUD de tarefas
-- ✅ Integração com banco de dados relacional (MySQL)
+- ✅ Persistência em banco relacional (MySQL)
+- ✅ Testes automatizados (unitários, de controller e de integração)
+- ✅ Docker e Docker Compose
+- ✅ CI com GitHub Actions
+
 ---
- 
+
 ## 🛠️ Tecnologias e Ferramentas
- 
+
 - Java 21
-- Spring Boot
-- Spring Security
-- Spring Data JPA
+- Spring Boot (Spring MVC)
+- Spring Data JPA / Hibernate
 - MySQL
-- JWT (JSON Web Token)
+- JWT (jjwt)
+- BCrypt (`spring-security-crypto`)
 - Lombok
 - Maven
+- JUnit 5, Mockito e Spring Test (MockMvc)
+- H2 (banco em memória, apenas nos testes)
+- Docker e Docker Compose
+- GitHub Actions
 - Postman
+
 ---
- 
-## 🔐 Autenticação com JWT
- 
-A autenticação da API é baseada em **token JWT**, retornado após login válido.
- 
-### 📍 Endpoint
- 
+
+## 📂 Endpoints
+
+| Método | Rota             | Descrição                          |
+|--------|------------------|------------------------------------|
+| POST   | `/usuarios`      | Cadastra um novo usuário           |
+| GET    | `/usuarios`      | Lista os usuários (sem a senha)    |
+| POST   | `/auth/login`    | Autentica e retorna o token JWT    |
+| POST   | `/tarefas`       | Cria uma tarefa                    |
+| GET    | `/tarefas`       | Lista as tarefas                   |
+| GET    | `/tarefas/{id}`  | Busca uma tarefa pelo id           |
+| DELETE | `/tarefas/{id}`  | Remove uma tarefa                  |
+
+### Exemplo de login
+
 ```
 POST /auth/login
 ```
- 
-### 📥 Requisição
- 
+
 ```json
 {
   "email": "teste@teste.com",
   "senha": "1234"
 }
 ```
- 
-### 📤 Resposta (200 OK)
- 
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
- 
+
+A resposta (200 OK) é o token JWT em texto. Credenciais inválidas retornam 401.
+
 ---
- 
-## 📂 Endpoints principais
- 
- 
-| Método | Rota             | Descrição                  | Autenticação |
-|--------|-------------------|-----------------------------|--------------|
-| POST   | `/auth/register`  | Cadastra um novo usuário    | Não          |
-| POST   | `/auth/login`      | Autentica e retorna o token | Não          |
-| GET    | `/tasks`           | Lista as tarefas do usuário | Sim (JWT)    |
-| POST   | `/tasks`           | Cria uma nova tarefa        | Sim (JWT)    |
-| PUT    | `/tasks/{id}`      | Atualiza uma tarefa         | Sim (JWT)    |
-| DELETE | `/tasks/{id}`      | Remove uma tarefa           | Sim (JWT)    |
- 
----
- 
+
 ## 📸 Testes no Postman
- 
-![Teste do endpoint de login no Postman](docs/postman-login.png)
- 
- 
+
+![Teste no Postman](Postman.png)
+
 ---
- 
+
 ## 📂 Estrutura do Projeto
- 
+
 ```
 controller   → Endpoints REST
 dto          → Entrada e saída de dados
 model        → Entidades JPA
 repository   → Acesso ao banco de dados
 service      → Regras de negócio
-security     → Autenticação e JWT
+security     → Geração do JWT
+config       → Configurações (BCrypt)
 ```
- 
+
 ---
- 
-## ⚙️ Como executar o projeto
- 
-### 1. Clone o repositório
- 
+
+## ⚙️ Como executar
+
+### Opção 1: Docker Compose (recomendado)
+
+Requer Docker. Sobe a API e o MySQL juntos.
+
 ```
 git clone https://github.com/ViniZiano/Devtasks.git
 cd Devtasks
+cp .env.example .env     # edite o .env e troque as senhas e o JWT_SECRET
+docker compose up --build
 ```
- 
-### 2. Configure o banco de dados
- 
-Crie um arquivo `application.properties` local (não versionado) com:
- 
-```
-spring.datasource.url=jdbc:mysql://localhost:3306/devtasks
-spring.datasource.username=root
-spring.datasource.password=sua_senha
-spring.jpa.hibernate.ddl-auto=update
-```
- 
- 
-### 3. Execute a aplicação
- 
+
+A API fica em `http://localhost:8080`.
+
+### Opção 2: direto com Maven
+
+Requer Java 21 e um MySQL em execução. Defina as variáveis de ambiente:
+
+| Variável      | Descrição                                   | Padrão                                  |
+|---------------|---------------------------------------------|-----------------------------------------|
+| `DB_URL`      | URL JDBC do banco                           | `jdbc:mysql://localhost:3306/devtasks`  |
+| `DB_USER`     | Usuário do banco                            | `root`                                  |
+| `DB_PASSWORD` | Senha do banco                              | vazio                                   |
+| `JWT_SECRET`  | Segredo do JWT, mínimo de 32 caracteres     | obrigatório                             |
+
 ```
 ./mvnw spring-boot:run
 ```
- 
-A API sobe por padrão em `http://localhost:8080`.
- 
+
 ---
- 
+
 ## 🧪 Testes
- 
-Os testes dos endpoints foram realizados utilizando o **Postman**, validando:
- 
-- Autenticação de usuários
-- Retorno de status HTTP corretos
-- Geração de token JWT
-> 🎯 **Próximo passo:** adicionar testes automatizados com JUnit 5 e Mockito para o `AuthService` e o `TaskService`, além de testes de integração para os endpoints principais.
- 
+
+```
+./mvnw test
+```
+
+A suíte tem 36 testes com JUnit 5 e Mockito:
+
+- **Unitários:** `TarefaService` (repositório simulado com Mockito) e `JwtService`
+- **Controller:** `AuthController`, `UsuarioController` e `TarefaController` com MockMvc
+- **Integração:** aplicação completa com banco H2 em memória, de ponta a ponta (controller, service, repository e banco)
+
+Não é preciso ter MySQL instalado para rodar os testes. Os endpoints também foram validados manualmente com o Postman.
+
 ---
- 
+
+## 🔄 Integração contínua
+
+O workflow em `.github/workflows/ci.yml` roda a cada push e pull request:
+
+1. `test`: executa `./mvnw test` com Java 21
+2. `docker`: faz o build da imagem Docker (só roda se os testes passarem)
+
+---
+
 ## 🎨 Interface para portfólio
- 
-O projeto também conta com uma interface web responsiva em `frontend/`, criada para apresentar o DevTasks de forma visual e elegante.
- 
+
+O projeto também conta com uma interface web responsiva em `frontend/`, criada para apresentar o DevTasks de forma visual.
+
 ### Como visualizar
- 
+
 1. Entre na pasta `frontend/`.
 2. Abra o arquivo `index.html` no navegador.
 3. Use **Nova tarefa** para adicionar tarefas e os filtros para alternar entre status.
- 
-### Destaques da interface
- 
-- Dashboard com indicadores de produtividade
-- Lista de tarefas com filtros por status
-- Criação de tarefas em modal
-- Layout responsivo para desktop e celular
-- Design moderno com tipografia, cards, badges e progresso visual
+
+Por enquanto a interface funciona de forma independente e ainda não está integrada à API.
+
 ---
- 
-## 📈 Competências demonstradas
- 
-- Desenvolvimento de APIs REST
-- Implementação de autenticação com JWT
-- Escrita de queries com Spring Data JPA
-- Integração com banco de dados relacional
-- Organização em arquitetura em camadas
-- Teste de APIs com Postman
----
- 
+
 ## 🗺️ Roadmap
- 
-- [ ] Testes automatizados (JUnit 5 + Mockito)
+
+- [x] Testes automatizados (JUnit 5 + Mockito)
+- [x] Containerização com Docker e docker-compose
+- [x] CI com GitHub Actions
+- [ ] Proteger os endpoints de tarefas com Spring Security e validação do JWT
+- [ ] Tarefas vinculadas ao usuário autenticado
+- [ ] Validação de entrada e tratamento global de exceções
 - [ ] Documentação interativa com Swagger/OpenAPI
-- [ ] Containerização com Docker e docker-compose
 - [ ] Versionamento do banco com Flyway
-- [ ] CI com GitHub Actions
 - [ ] Integração real do frontend com a API
 - [ ] Deploy (Render/Railway) com link público
+
 ---
- 
+
 ## 👨‍💻 Autor
- 
+
 **Vinícius Figueiredo Ziano**
-Estudante de Análise e Desenvolvimento de Sistemas (ADS) — UNIBRA
- 
+Estudante de Análise e Desenvolvimento de Sistemas (ADS), UNIBRA
+
 🔗 LinkedIn: [linkedin.com/in/ViniZiano](https://linkedin.com/in/ViniZiano)
 🔗 GitHub: [github.com/ViniZiano](https://github.com/ViniZiano)
- 

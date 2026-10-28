@@ -1,0 +1,31 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: devtasks
+      MYSQL_USER: ${DB_USER:-devtasks}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD no arquivo .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Defina DB_ROOT_PASSWORD no arquivo .env}
+    volumes:
+      - devtasks-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/devtasks?allowPublicKeyRetrieval=true&useSSL=false
+      DB_USER: ${DB_USER:-devtasks}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no arquivo .env (mínimo 32 caracteres)}
+    ports:
+      - "8080:8080"
+
+volumes:
+  devtasks-db:
