@@ -1,5 +1,6 @@
 package com.vinicius.devtasks.security;
 
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class JwtService {
@@ -37,4 +39,24 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Valida a assinatura e a validade do token e devolve o e-mail (subject).
+     * Token adulterado, expirado ou malformado devolve Optional vazio.
+     */
+    public Optional<String> extrairEmail(String token) {
+        if (token == null || token.isBlank()) {
+            return Optional.empty();
+        }
+        try {
+            String email = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .getSubject();
+            return Optional.ofNullable(email);
+        } catch (JwtException | IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
 }

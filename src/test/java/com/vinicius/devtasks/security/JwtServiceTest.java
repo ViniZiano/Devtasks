@@ -91,4 +91,36 @@ class JwtServiceTest {
     void segredoCurtoDeveLancarExcecao() {
         assertThrows(IllegalStateException.class, () -> new JwtService("curto"));
     }
+
+    @Test
+    @DisplayName("extrairEmail deve devolver o e-mail de um token válido")
+    void extrairEmailDeTokenValido() {
+        String token = jwtService.gerarToken("vini@teste.com");
+
+        assertEquals("vini@teste.com", jwtService.extrairEmail(token).orElseThrow());
+    }
+
+    @Test
+    @DisplayName("extrairEmail deve rejeitar token adulterado, de outra chave, expirado ou lixo")
+    void extrairEmailDeveRejeitarTokensInvalidos() {
+        String valido = jwtService.gerarToken("vini@teste.com");
+        String adulterado = valido.substring(0, valido.length() - 2) + "xx";
+
+        SecretKey outraChave = Keys.hmacShaKeyFor(
+                "outra-chave-totalmente-diferente-com-32-bytes!!".getBytes(StandardCharsets.UTF_8));
+        String deOutraChave = Jwts.builder().subject("vini@teste.com").signWith(outraChave).compact();
+
+        String expirado = Jwts.builder()
+                .subject("vini@teste.com")
+                .expiration(new Date(System.currentTimeMillis() - 1000))
+                .signWith(chave)
+                .compact();
+
+        assertTrue(jwtService.extrairEmail(adulterado).isEmpty());
+        assertTrue(jwtService.extrairEmail(deOutraChave).isEmpty());
+        assertTrue(jwtService.extrairEmail(expirado).isEmpty());
+        assertTrue(jwtService.extrairEmail("isso-nao-e-um-jwt").isEmpty());
+        assertTrue(jwtService.extrairEmail("").isEmpty());
+        assertTrue(jwtService.extrairEmail(null).isEmpty());
+    }
 }

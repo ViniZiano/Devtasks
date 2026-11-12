@@ -50,10 +50,10 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- BCrypt para guardar senhas com hash (só o módulo de criptografia, sem travar os endpoints) -->
+		<!-- SPRING SECURITY: protege as rotas com o filtro JWT e fornece o BCrypt para as senhas -->
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-crypto</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
 		<!-- LOMBOK -->
