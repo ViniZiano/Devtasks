@@ -4,7 +4,7 @@ Aplicação web de gerenciamento de tarefas com **API REST em Java 21 + Spring B
 
 Projeto criado com foco em práticas de back-end: endpoints REST, autenticação e autorização, persistência com Spring Data JPA, testes automatizados, containerização e integração contínua.
 
-> 🔗 **Demo online:** _em breve (o link entra aqui depois do deploy)_
+> 🔗 **Demo online:** _em breve (o link entra aqui depois do deploy)_ · 📄 [Guia de deploy passo a passo](DEPLOY.md)
 
 ---
 
@@ -213,7 +213,7 @@ Limitações conhecidas (honestas, para evoluir depois):
 - [ ] Validação de entrada (Bean Validation) e tratamento global de exceções
 - [ ] Documentação interativa com Swagger/OpenAPI
 - [ ] Versionamento do banco com Flyway
-- [ ] Deploy com link público
+- [ ] Deploy com link público ([guia em DEPLOY.md](DEPLOY.md))
 
 ---
 
