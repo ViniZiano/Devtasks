@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,18 +90,29 @@ class UsuarioControllerTest {
     }
 
     @Test
-    @DisplayName("Listar usuários deve devolver DTOs (sem senha)")
-    void listarDeveRetornarDtosSemSenha() {
+    @DisplayName("GET /usuarios/me deve devolver os dados (sem senha) de quem está logado")
+    void meDeveRetornarUsuarioLogado() {
         Usuario usuario = new Usuario();
         usuario.setId(1L);
         usuario.setNome("Vinicius");
         usuario.setEmail("vini@teste.com");
         usuario.setSenha("hash-bcrypt");
-        when(repository.findAll()).thenReturn(List.of(usuario));
+        when(repository.findByEmail("vini@teste.com")).thenReturn(Optional.of(usuario));
 
-        List<UsuarioResponseDTO> resultado = controller.listar();
+        UsuarioResponseDTO resultado = controller.me(() -> "vini@teste.com");
 
-        assertEquals(1, resultado.size());
-        assertEquals("vini@teste.com", resultado.get(0).email());
+        assertEquals("Vinicius", resultado.nome());
+        assertEquals("vini@teste.com", resultado.email());
+    }
+
+    @Test
+    @DisplayName("GET /usuarios/me com usuário que não existe mais deve responder 401")
+    void meComUsuarioInexistenteDeveRetornar401() {
+        when(repository.findByEmail("sumiu@teste.com")).thenReturn(Optional.empty());
+
+        ResponseStatusException erro = assertThrows(ResponseStatusException.class,
+                () -> controller.me(() -> "sumiu@teste.com"));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, erro.getStatusCode());
     }
 }

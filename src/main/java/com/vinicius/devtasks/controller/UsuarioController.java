@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -46,10 +46,11 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponseDTO.de(salvo));
     }
 
-    @GetMapping
-    public List<UsuarioResponseDTO> listar() {
-        return repository.findAll().stream()
-                .map(UsuarioResponseDTO::de)
-                .toList();
+    /** Dados de quem está logado (o e-mail vem do token JWT validado pelo filtro). */
+    @GetMapping("/me")
+    public UsuarioResponseDTO me(Principal principal) {
+        Usuario usuario = repository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado"));
+        return UsuarioResponseDTO.de(usuario);
     }
 }
