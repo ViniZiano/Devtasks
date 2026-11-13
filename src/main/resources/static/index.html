@@ -13,6 +13,12 @@
 </head>
 <body>
 
+  <!-- aparece só no modo demonstração (GitHub Pages) -->
+  <div id="demoBanner" class="demo-banner" role="note" hidden>
+    <strong>Modo demonstração:</strong> seus dados ficam só neste navegador. A versão completa roda com API Java (Spring Boot + JWT + MySQL) —
+    <a href="https://github.com/ViniZiano/Devtasks" target="_blank" rel="noreferrer">veja o código ↗</a>
+  </div>
+
   <!-- ============ TELA DE ENTRADA (login / cadastro) ============ -->
   <main id="authView" class="auth" hidden>
     <section class="auth-card">
@@ -120,6 +126,7 @@
     </form>
   </dialog>
 
+  <script src="js/demo-api.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

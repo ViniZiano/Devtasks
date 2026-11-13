@@ -8,6 +8,10 @@
 
   const state = { tasks: [], filter: 'ALL', editingId: null, modo: 'login' };
 
+  // Modo demonstração: no GitHub Pages (ou com ?demo na URL) não existe servidor, então a API é simulada no navegador
+  const DEMO = !!window.DevTasksDemo
+    && (location.hostname.endsWith('github.io') || /[?&]demo(=|&|$)/.test(location.search));
+
   /* ---------- token (localStorage pode estar bloqueado: nunca quebra a página) ---------- */
   const store = {
     get() { try { return localStorage.getItem(TOKEN_KEY); } catch { return null; } },
@@ -18,6 +22,8 @@
 
   /* ---------- chamada à API ---------- */
   async function api(path, { method = 'GET', body, auth = true } = {}) {
+    if (DEMO) return apiDemo(path, { method, body, auth });
+
     const headers = {};
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (auth && token) headers['Authorization'] = 'Bearer ' + token;
@@ -38,6 +44,19 @@
 
     const tipo = resp.headers.get('content-type') || '';
     return tipo.includes('application/json') ? resp.json() : resp.text();
+  }
+
+  async function apiDemo(path, opcoes) {
+    try {
+      return await window.DevTasksDemo.handle(path, { ...opcoes, token });
+    } catch (e) {
+      if (!e || !e.demo) throw e;
+      if (e.status === 401 && opcoes.auth) {
+        logout('Sua sessão expirou. Entre novamente.');
+        throw new ApiError(401, 'Sessão expirada');
+      }
+      throw new ApiError(e.status, e.message);
+    }
   }
 
   class ApiError extends Error {
@@ -278,6 +297,8 @@
   $('logoutBtn').addEventListener('click', () => logout(''));
 
   /* ---------- início ---------- */
+  if (DEMO) $('demoBanner').hidden = false;
+
   if (token) {
     abrirApp();
   } else {

@@ -4,7 +4,7 @@ Aplicação web de gerenciamento de tarefas com **API REST em Java 21 + Spring B
 
 Projeto criado com foco em práticas de back-end: endpoints REST, autenticação e autorização, persistência com Spring Data JPA, testes automatizados, containerização e integração contínua.
 
-> 🔗 **Demo online:** _em breve (o link entra aqui depois do deploy)_ · 📄 [Guia de deploy passo a passo](DEPLOY.md)
+> 🔗 **Demonstração:** [viniziano.github.io/Devtasks](https://viniziano.github.io/Devtasks/) (roda só no navegador, sem servidor) · **Versão completa com API:** _em breve (o link entra aqui depois do deploy)_ · 📄 [Guia de deploy passo a passo](DEPLOY.md)
 
 ---
 
@@ -103,6 +103,17 @@ Ao subir a aplicação, abra `http://localhost:8080`:
 3. Use os filtros para alternar entre _A fazer_, _Em andamento_ e _Concluídas_.
 
 O token JWT fica salvo no `localStorage` do navegador e expira em 1 hora (depois disso o site pede o login de novo).
+
+### Demonstração no GitHub Pages
+
+O GitHub Pages só serve arquivos estáticos e não roda o Spring Boot. Por isso a raiz do repositório tem uma cópia do mesmo site (`index.html`, `css/`, `js/`) que, ao ser aberta em `github.io` ou com `?demo` na URL, usa `js/demo-api.js`: um simulador das rotas da API que guarda tudo no navegador de quem acessa. Nada é enviado a servidor algum, e a versão real (Spring Boot + JWT + MySQL) não usa esse arquivo.
+
+A cópia da raiz precisa ficar idêntica à de `src/main/resources/static/`; o CI falha se as duas divergirem. Para atualizar:
+
+```
+cp src/main/resources/static/index.html src/main/resources/static/favicon.svg .
+cp -r src/main/resources/static/css src/main/resources/static/js .
+```
 
 ---
 

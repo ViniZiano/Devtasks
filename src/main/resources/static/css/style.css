@@ -107,3 +107,7 @@ dialog h3{font-size:22px;margin-bottom:18px}
   .hero .primary{width:auto}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* modo demonstração */
+.demo-banner{background:var(--brand-soft);color:var(--brand-dark);text-align:center;font-size:13px;font-weight:600;padding:9px 16px}
+.demo-banner a{color:inherit;text-decoration:underline}
