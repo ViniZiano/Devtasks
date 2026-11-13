@@ -19,6 +19,12 @@
     <a href="https://github.com/ViniZiano/Devtasks" target="_blank" rel="noreferrer">veja o código ↗</a>
   </div>
 
+  <!-- aparece só se o servidor gratuito estiver dormindo e demorar para responder -->
+  <div id="wakeNotice" class="demo-banner wake-notice" role="status" aria-live="polite" hidden>
+    ⏳ <strong>Acordando o servidor…</strong> O plano gratuito hiberna depois de 15 minutos sem uso, então a primeira resposta leva cerca de 1 minuto.
+    Quer ver agora? <a href="?demo">Abra a demonstração</a>.
+  </div>
+
   <!-- ============ TELA DE ENTRADA (login / cadastro) ============ -->
   <main id="authView" class="auth" hidden>
     <section class="auth-card">
@@ -126,6 +132,7 @@
     </form>
   </dialog>
 
+  <script src="js/config.js"></script>
   <script src="js/demo-api.js"></script>
   <script src="js/app.js"></script>
 </body>

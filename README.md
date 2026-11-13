@@ -104,16 +104,26 @@ Ao subir a aplicação, abra `http://localhost:8080`:
 
 O token JWT fica salvo no `localStorage` do navegador e expira em 1 hora (depois disso o site pede o login de novo).
 
-### Demonstração no GitHub Pages
+### Site no GitHub Pages: demonstração ou API real
 
-O GitHub Pages só serve arquivos estáticos e não roda o Spring Boot. Por isso a raiz do repositório tem uma cópia do mesmo site (`index.html`, `css/`, `js/`) que, ao ser aberta em `github.io` ou com `?demo` na URL, usa `js/demo-api.js`: um simulador das rotas da API que guarda tudo no navegador de quem acessa. Nada é enviado a servidor algum, e a versão real (Spring Boot + JWT + MySQL) não usa esse arquivo.
+O GitHub Pages só serve arquivos estáticos e não roda o Spring Boot. Por isso a raiz do repositório tem uma cópia do mesmo site (`index.html`, `css/`, `js/`) que funciona de dois jeitos, conforme o `js/config.js` da raiz:
 
-A cópia da raiz precisa ficar idêntica à de `src/main/resources/static/`; o CI falha se as duas divergirem. Para atualizar:
+| `apiUrl` em `js/config.js` | O que o site faz |
+|----------------------------|------------------|
+| vazio (`''`) | **Modo demonstração**: `js/demo-api.js` simula as rotas da API e guarda tudo no navegador de quem acessa. Nada é enviado a servidor algum. |
+| endereço da API publicada (ex.: `https://devtasks-xxxx.onrender.com`) | O site conversa com a **API real** (Spring Boot + JWT + MySQL). O back-end libera esse site com CORS (variável `CORS_ORIGINS`) e o site avisa _"Acordando o servidor…"_ quando o plano gratuito está dormindo. |
+
+Com `?demo` na URL a demonstração abre mesmo com a API configurada. O passo a passo para publicar a API está no [DEPLOY.md](DEPLOY.md).
+
+A cópia da raiz precisa ficar idêntica à de `src/main/resources/static/`, **exceto `js/config.js`**; o CI falha se divergirem. Para atualizar:
 
 ```
 cp src/main/resources/static/index.html src/main/resources/static/favicon.svg .
-cp -r src/main/resources/static/css src/main/resources/static/js .
+cp -r src/main/resources/static/css .
+cp src/main/resources/static/js/app.js src/main/resources/static/js/demo-api.js js/
 ```
+
+(não copie o `config.js`: o da raiz guarda o endereço da API publicada.)
 
 ---
 
@@ -163,6 +173,7 @@ Requer Java 21 e um MySQL em execução. Defina as variáveis de ambiente:
 | `DB_USER`     | Usuário do banco                            | `root`                                  |
 | `DB_PASSWORD` | Senha do banco                              | vazio                                   |
 | `JWT_SECRET`  | Segredo do JWT, mínimo de 32 caracteres     | obrigatório                             |
+| `CORS_ORIGINS`| Sites autorizados a chamar a API pelo navegador (separe por vírgula) | `https://viniziano.github.io` |
 
 ```
 ./mvnw spring-boot:run

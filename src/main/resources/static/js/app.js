@@ -1,16 +1,21 @@
-/* DevTasks — front-end. Fala com a API Spring Boot na mesma origem (sem CORS). */
+/* DevTasks — front-end. Fala com a API Spring Boot: na mesma origem ou no endereço definido em js/config.js. */
 (() => {
   'use strict';
 
-  const TOKEN_KEY = 'devtasks.token';
   const LABELS = { TODO: 'A fazer', DOING: 'Em andamento', DONE: 'Concluída' };
   const $ = (id) => document.getElementById(id);
 
   const state = { tasks: [], filter: 'ALL', editingId: null, modo: 'login' };
 
-  // Modo demonstração: no GitHub Pages (ou com ?demo na URL) não existe servidor, então a API é simulada no navegador
+  // Endereço da API (js/config.js). Vazio = mesma origem do site.
+  const API_BASE = String((window.DEVTASKS_CONFIG && window.DEVTASKS_CONFIG.apiUrl) || '').trim().replace(/\/+$/, '');
+
+  // Modo demonstração: a API é simulada no navegador. Vale com ?demo na URL, ou no GitHub Pages quando ainda não há API configurada
   const DEMO = !!window.DevTasksDemo
-    && (location.hostname.endsWith('github.io') || /[?&]demo(=|&|$)/.test(location.search));
+    && (/[?&]demo(=|&|$)/.test(location.search) || (!API_BASE && location.hostname.endsWith('github.io')));
+
+  // a demonstração usa uma chave própria para não misturar o token falso com o token real da API
+  const TOKEN_KEY = DEMO ? 'devtasks.demo.token' : 'devtasks.token';
 
   /* ---------- token (localStorage pode estar bloqueado: nunca quebra a página) ---------- */
   const store = {
@@ -27,12 +32,23 @@
     const headers = {};
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (auth && token) headers['Authorization'] = 'Bearer ' + token;
+    const opcoes = { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined };
+
+    await garantirServidor();
 
     let resp;
     try {
-      resp = await fetch(path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+      resp = await fetch(API_BASE + path, opcoes);
     } catch {
-      throw new ApiError(0, 'Não consegui falar com o servidor. Verifique sua conexão.');
+      // o servidor gratuito pode ter voltado a dormir com a página aberta: acorda e tenta mais uma vez
+      if (!API_BASE) throw new ApiError(0, 'Não consegui falar com o servidor. Verifique sua conexão.');
+      servidorPronto = false;
+      await garantirServidor();
+      try {
+        resp = await fetch(API_BASE + path, opcoes);
+      } catch {
+        throw new ApiError(0, 'Não consegui falar com o servidor. Verifique sua conexão e tente de novo.');
+      }
     }
 
     if (resp.status === 401 && auth) {      // token vencido (1 h) ou inválido
@@ -44,6 +60,33 @@
 
     const tipo = resp.headers.get('content-type') || '';
     return tipo.includes('application/json') ? resp.json() : resp.text();
+  }
+
+  /* ---------- servidor gratuito dorme depois de 15 min sem uso: acorda e avisa quem está esperando ---------- */
+  let servidorPronto = DEMO || !API_BASE;   // mesma origem ou demonstração: não há nada para acordar
+  let acordando = null;
+
+  function garantirServidor() {
+    if (servidorPronto) return Promise.resolve();
+    if (!acordando) acordando = acordarServidor().finally(() => { acordando = null; });
+    return acordando;
+  }
+
+  async function acordarServidor() {
+    const aviso = $('wakeNotice');
+    const timer = setTimeout(() => { aviso.hidden = false; }, 2500);   // só aparece se demorar
+    try {
+      for (let i = 0; i < 25; i++) {                                    // ~100 s no máximo
+        try {
+          const r = await fetch(API_BASE + '/actuator/health', { cache: 'no-store' });
+          if (r.ok) { servidorPronto = true; return; }
+        } catch { /* ainda acordando */ }
+        await new Promise((ok) => setTimeout(ok, 4000));
+      }
+    } finally {
+      clearTimeout(timer);
+      aviso.hidden = true;
+    }
   }
 
   async function apiDemo(path, opcoes) {
@@ -298,6 +341,7 @@
 
   /* ---------- início ---------- */
   if (DEMO) $('demoBanner').hidden = false;
+  garantirServidor();   // já começa a acordar o servidor enquanto a pessoa digita o e-mail e a senha
 
   if (token) {
     abrirApp();
