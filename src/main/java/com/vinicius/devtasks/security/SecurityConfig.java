@@ -1,9 +1,11 @@
 package com.vinicius.devtasks.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,6 +13,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -20,6 +28,8 @@ public class SecurityConfig {
         http
                 // API stateless com token no cabeçalho: não usa cookie de sessão, então CSRF não se aplica
                 .csrf(csrf -> csrf.disable())
+                // libera o site do GitHub Pages (outra origem) a chamar esta API; usa o bean corsConfigurationSource
+                .cors(Customizer.withDefaults())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // login e cadastro são públicos
@@ -36,6 +46,34 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * CORS: o navegador só deixa o site em https://viniziano.github.io ler as respostas desta API
+     * se ela disser que aceita aquela origem. As origens aceitas vêm de CORS_ORIGINS (separadas por vírgula).
+     * O token vai no cabeçalho Authorization (não em cookie), então não precisa de allowCredentials.
+     */
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${cors.allowed-origins:https://viniziano.github.io}") String origens) {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(normalizarOrigens(origens));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    /** Tira espaços e a barra final ("https://site.github.io/" não bate com a origem "https://site.github.io"). */
+    static List<String> normalizarOrigens(String origens) {
+        return Arrays.stream(origens.split(","))
+                .map(String::trim)
+                .map(o -> o.replaceAll("/+$", ""))
+                .filter(o -> !o.isEmpty())
+                .toList();
     }
 
     /**
