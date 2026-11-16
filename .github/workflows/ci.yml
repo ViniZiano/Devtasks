@@ -20,8 +20,9 @@ jobs:
 
       - name: Conferir que o site da raiz (GitHub Pages) é igual ao do Spring
         run: |
+          # js/config.js é a única diferença permitida: na raiz ele aponta para a API publicada
           diff -r src/main/resources/static/css css
-          diff -r src/main/resources/static/js js
+          diff -r -x config.js src/main/resources/static/js js
           diff src/main/resources/static/index.html index.html
           diff src/main/resources/static/favicon.svg favicon.svg
 

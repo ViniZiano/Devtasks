@@ -312,4 +312,51 @@ class DevtasksIntegrationTest {
                 .andExpect(jsonPath("$.nomeUsuario").value("Vinicius"))
                 .andExpect(jsonPath("$.usuario").doesNotExist());
     }
+
+    // ---------- CORS (o site do GitHub Pages, em outra origem, chamando esta API) ----------
+
+    private static final String SITE_PAGES = "https://viniziano.github.io";
+
+    @Test
+    @DisplayName("CORS: preflight vindo do site do GitHub Pages é aceito, sem exigir token")
+    void preflightDoSiteDoPagesDeveSerAceito() throws Exception {
+        mockMvc.perform(options("/tarefas")
+                        .header("Origin", SITE_PAGES)
+                        .header("Access-Control-Request-Method", "POST")
+                        .header("Access-Control-Request-Headers", "authorization,content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", SITE_PAGES))
+                .andExpect(header().exists("Access-Control-Allow-Methods"));
+    }
+
+    @Test
+    @DisplayName("CORS: origem desconhecida é barrada no preflight")
+    void preflightDeOrigemDesconhecidaDeveSerRecusado() throws Exception {
+        mockMvc.perform(options("/tarefas")
+                        .header("Origin", "https://site-malicioso.example")
+                        .header("Access-Control-Request-Method", "POST"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    }
+
+    @Test
+    @DisplayName("CORS: até a resposta 401 leva o cabeçalho, para o site conseguir ler o erro")
+    void respostaDeErroTambemDeveTrazerCabecalhoCors() throws Exception {
+        mockMvc.perform(get("/tarefas").header("Origin", SITE_PAGES))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().string("Access-Control-Allow-Origin", SITE_PAGES));
+    }
+
+    @Test
+    @DisplayName("CORS: login feito pelo site do Pages devolve o token com o cabeçalho de origem")
+    void loginPeloSiteDoPagesDeveFuncionar() throws Exception {
+        cadastrarUsuario();
+
+        mockMvc.perform(post("/auth/login")
+                        .header("Origin", SITE_PAGES)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"email\": \"vini@teste.com\", \"senha\": \"1234\"}"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin", SITE_PAGES));
+    }
 }

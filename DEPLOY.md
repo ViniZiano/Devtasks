@@ -11,6 +11,9 @@ O DevTasks precisa de 3 peças:
 | Banco de dados | MySQL | TiDB Cloud Starter (grátis, compatível com MySQL) |
 | API + site | Contêiner Docker (o mesmo `Dockerfile` do projeto) | Render (plano gratuito) |
 | Configuração | Variáveis de ambiente (`DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`) | Painel do Render |
+| Site no GitHub Pages | O mesmo site, ligado à API pelo arquivo `js/config.js` | `https://viniziano.github.io/Devtasks/` |
+
+O site existe em dois lugares: o próprio Render já entrega o site junto com a API (mesmo endereço), e o GitHub Pages entrega uma cópia que conversa com a API do Render. O Passo 5 liga os dois.
 
 > **Por que não o MySQL grátis da Aiven?** O plano gratuito de MySQL da Aiven está sendo encerrado: novos serviços gratuitos não podem mais ser criados e os existentes são desligados em 21/12/2026. O PlanetScale também não tem plano gratuito.
 
@@ -79,6 +82,8 @@ export JWT_SECRET="o-segredo-do-passo-1"
    | `JWT_SECRET` | o segredo do passo 1 |
 
    Não é preciso definir `PORT`: o Render define sozinho e a aplicação lê essa variável.
+
+   Opcional: `CORS_ORIGINS` diz quais sites podem chamar a API pelo navegador. O padrão já é `https://viniziano.github.io`, então só mexa nisso se usar outro endereço (separe vários por vírgula, sem barra no final).
 5. Em **Health Check Path**, coloque `/actuator/health`.
 6. Clique em **Create Web Service** e espere o build (alguns minutos na primeira vez).
 
@@ -94,7 +99,22 @@ Quando o status ficar **Live**, o Render mostra o link, algo como `https://devta
    Deve responder `{"status":"UP"}`.
 3. Sem token, `GET /tarefas` deve responder 401.
 
-## Passo 5 — Divulgar
+## Passo 5 — Ligar o site do GitHub Pages à API
+
+Hoje o site em `https://viniziano.github.io/Devtasks/` abre em **modo demonstração** (os dados ficam só no navegador). Para ele usar a API de verdade:
+
+1. No repositório, abra o arquivo `js/config.js` **da raiz** (não o de `src/main/resources/static/`) e troque o endereço:
+   ```js
+   window.DEVTASKS_CONFIG = { apiUrl: 'https://devtasks-xxxx.onrender.com' };
+   ```
+   Use o link do Render, sem barra no final. O `js/config.js` de `src/main/resources/static/` continua com `apiUrl: ''` (no Render, site e API já estão no mesmo endereço).
+2. Faça commit e `git push`. Em um ou dois minutos o GitHub Pages publica a nova versão.
+3. Abra `https://viniziano.github.io/Devtasks/`, crie uma conta e uma tarefa. Confira no painel do banco (SQL Editor) que a tabela `tarefa` recebeu a linha.
+4. Se o navegador mostrar um erro de **CORS** no Console (F12), confira se `CORS_ORIGINS` no Render está igual ao endereço do site (`https://viniziano.github.io`, sem barra no final) e se o serviço foi reiniciado depois de mudar a variável.
+
+O site mostra o aviso _"Acordando o servidor…"_ quando o plano gratuito está dormindo e já começa a acordá-lo assim que a página abre. A demonstração continua disponível em `https://viniziano.github.io/Devtasks/?demo` para quem não quiser esperar.
+
+## Passo 6 — Divulgar
 
 - Coloque o link no topo do `README.md` (na linha **Demo online**).
 - Coloque o link na descrição do repositório (⚙️ ao lado de _About_) e no card do projeto no portfólio.
@@ -121,6 +141,7 @@ Quando o status ficar **Live**, o Render mostra o link, algo como `https://devta
 | README com endpoints e exemplos | ✅ feito |
 | Autenticação JWT com rotas protegidas | ✅ feito |
 | Site integrado à API | ✅ feito |
+| Site do GitHub Pages com a API real (CORS) | ✅ pronto no código; falta o Passo 5 depois do deploy |
 | Deploy com link público | 📄 este guia |
 | Documentação interativa (Swagger/OpenAPI) | ⏳ ainda não implementado (roadmap) |
 | Versionamento do banco (Flyway) | ⏳ ainda não implementado (roadmap) |
